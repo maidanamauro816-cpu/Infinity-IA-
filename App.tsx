@@ -27,7 +27,7 @@ export default function App() {
   const [songs, setSongs] = useState<Song[]>([]);
   const [studioTrack, setStudioTrack] = useState<{uri:string;name:string;mimeType?:string}|null>(null);
   const [studioBusy, setStudioBusy] = useState(false);
-  const [effect, setEffect] = useState("Auto-Tune");
+  const [effects, setEffects] = useState<string[]>(["Afinación vocal", "EQ paramétrico", "Compresor"]);
   const [preset, setPreset] = useState("Lead vocal");
   const [message, setMessage] = useState("Tu estudio musical está listo para empezar.");
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -119,7 +119,7 @@ export default function App() {
         const result = await separateStems(uploaded.id);
         setMessage("Separación solicitada. Trabajo: " + (result.status || "en cola"));
       } else {
-        const result = await processVocal(uploaded.id, { effect, preset });
+        const result = await processVocal(uploaded.id, { effects, preset });
         setMessage("Procesamiento vocal solicitado. Trabajo: " + (result.status || "en cola"));
       }
     } catch (error) {
@@ -230,13 +230,15 @@ export default function App() {
               <Text style={styles.fieldLabel}>PROCESAMIENTO VOCAL</Text>
               <Text style={styles.toolTitle}>Efectos de estudio</Text>
               <Text style={styles.toolDescription}>Elegí un efecto principal y un preset de mezcla. La cadena final se procesa en el servidor de audio.</Text>
-              <Text style={styles.fieldLabel}>EFECTO</Text>
-              <View style={styles.chips}>{["Auto-Tune","Reverb","Delay","Chorus","Compresor","EQ","Distorsión","Reducción ruido"].map(x => <Pressable key={x} onPress={() => setEffect(x)} style={[styles.chip,effect===x && styles.chipSelected]}><Text style={[styles.chipText,effect===x && styles.chipTextSelected]}>{x}</Text></Pressable>)}</View>
-              <Text style={styles.fieldLabel}>PRESET VOCAL</Text>
-              <View style={styles.chips}>{["Lead vocal","Rap / Trap","Cumbia","Pop brillante","Voz cálida","Doblaje"].map(x => <Pressable key={x} onPress={() => setPreset(x)} style={[styles.chip,preset===x && styles.chipSelected]}><Text style={[styles.chipText,preset===x && styles.chipTextSelected]}>{x}</Text></Pressable>)}</View>
-              <Pressable disabled={studioBusy} onPress={() => runStudioAction("effect")} style={[styles.primaryButton,studioBusy && styles.disabled]}>{studioBusy ? <ActivityIndicator color="#FFFFFF"/> : <Text style={styles.primaryText}>✦  PROCESAR MI VOZ</Text>}</Pressable>
+              <Text style={styles.fieldLabel}>CADENA PROFESIONAL · SELECCIONÁ VARIOS</Text>
+              <Text style={styles.toolDescription}>Activá los módulos que quieras combinar. El orden y los parámetros definitivos los aplica el procesador del servidor.</Text>
+              <View style={styles.chips}>{["Afinación vocal","EQ paramétrico","Compresor","De-esser","Gate / Expander","Reverb de placa","Reverb de sala","Delay estéreo","Ping-pong delay","Chorus","Flanger","Phaser","Saturación analógica","Distorsión armónica","Exciter","Doblador vocal","Armonizador","Vocoder","Reducción de ruido","Limitador","Compresión multibanda","Stereo widener","Transientes","Auto nivel"].map(x => <Pressable key={x} onPress={() => setEffects(current => current.includes(x) ? current.filter(v => v !== x) : [...current, x])} style={[styles.chip,effects.includes(x) && styles.chipSelected]}><Text style={[styles.chipText,effects.includes(x) && styles.chipTextSelected]}>{effects.includes(x) ? "✓ " : "+ "}{x}</Text></Pressable>)}</View>
+              <Text style={styles.fieldLabel}>PRESET / CADENA INICIAL</Text>
+              <View style={styles.chips}>{["Lead vocal","Rap / Trap","Cumbia potente","Reggaetón moderno","Pop brillante","Rock agresivo","Voz cálida","Balada íntima","Voz aireada","Radio / Broadcast","Doblaje ancho","Vocoder creativo"].map(x => <Pressable key={x} onPress={() => setPreset(x)} style={[styles.chip,preset===x && styles.chipSelected]}><Text style={[styles.chipText,preset===x && styles.chipTextSelected]}>{x}</Text></Pressable>)}</View>
+              <Text style={styles.hint}>{effects.length} módulos seleccionados · {preset}</Text>
+              <Pressable disabled={studioBusy || effects.length===0} onPress={() => runStudioAction("effect")} style={[styles.primaryButton,(studioBusy || effects.length===0) && styles.disabled]}>{studioBusy ? <ActivityIndicator color="#FFFFFF"/> : <Text style={styles.primaryText}>✦  PROCESAR CADENA VOCAL</Text>}</Pressable>
             </View>
-            <View style={styles.notice}><Text style={styles.noticeTitle}>Herramientas incluidas en el diseño</Text><Text style={styles.noticeText}>Corrección de tono tipo Auto-Tune, reverb, delay, chorus, compresión, ecualizador, distorsión, reducción de ruido, presets vocales y separación de stems. Los nombres describen funciones de audio habituales; no se copian marcas, interfaces ni efectos propietarios de Voloco.</Text></View>
+            <View style={styles.notice}><Text style={styles.noticeTitle}>Herramientas incluidas en el diseño</Text><Text style={styles.noticeText}>Afinación vocal, EQ paramétrico, compresión multibanda, de-esser, gate, reverbs, delays estéreo, modulación, saturación, exciter, armonizador, vocoder, reducción de ruido, limitador, expansión estéreo y separación de stems. Los nombres describen funciones de audio habituales; no se copian marcas, interfaces ni efectos propietarios de Voloco.</Text></View>
           </>}
 
           {tab === "library" && <>
