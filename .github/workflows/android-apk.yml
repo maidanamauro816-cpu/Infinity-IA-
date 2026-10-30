@@ -24,12 +24,12 @@ jobs:
         run: npx tsc --noEmit
       - name: Generate native Android project
         run: npx expo prebuild --platform android --no-install --non-interactive
-      - name: Build debug APK
+      - name: Build standalone release APK (bundles JavaScript)
         working-directory: android
-        run: chmod +x gradlew && ./gradlew assembleDebug --no-daemon
-      - name: Upload APK
+        run: chmod +x gradlew && ./gradlew assembleRelease --no-daemon
+      - name: Upload standalone APK
         uses: actions/upload-artifact@v4
         with:
-          name: sixseven-music-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: sumo-android-release-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
