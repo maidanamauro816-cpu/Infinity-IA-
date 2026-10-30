@@ -5,7 +5,7 @@ import {
 } from "react-native";
 import { Audio } from "expo-av";
 import * as DocumentPicker from "expo-document-picker";
-import { createSong, uploadVoiceSample, uploadStudioTrack, separateStems, processVocal, type SongRequest } from "./src/services/api";
+import { createSong, uploadVoiceSample, uploadStudioTrack, separateStems, processVocal, getStudioJob, type SongRequest } from "./src/services/api";
 
 type Tab = "create" | "voice" | "studio" | "library";
 type Song = { id: string; title: string; style: string; status: string; audioUrl?: string };
@@ -120,7 +120,20 @@ export default function App() {
         setMessage("Separación solicitada. Trabajo: " + (result.status || "en cola"));
       } else {
         const result = await processVocal(uploaded.id, { effects, preset });
-        setMessage("Procesamiento vocal solicitado. Trabajo: " + (result.status || "en cola"));
+        if (!result.id) throw new Error("El servidor no devolvió un identificador de trabajo.");
+        setMessage("Procesando tu cadena profesional de efectos…");
+        let completed = false;
+        for (let attempt = 0; attempt < 90; attempt += 1) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          const job = await getStudioJob(result.id);
+          if (job.status === "succeeded") {
+            setMessage("¡Procesamiento terminado! Tu WAV está disponible en: " + (job.outputUrl || "la biblioteca del servidor"));
+            completed = true;
+            break;
+          }
+          if (job.status === "failed") throw new Error(job.error || "El motor DSP no pudo procesar este audio.");
+        }
+        if (!completed) setMessage("El procesamiento sigue en curso. Podés consultar el trabajo " + result.id);
       }
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "No se pudo procesar el audio. Revisá la conexión del backend.");
