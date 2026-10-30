@@ -71,12 +71,12 @@ export async function separateStems(trackId: string): Promise<StudioJobResponse>
   return await response.json() as StudioJobResponse;
 }
 
-export async function processVocal(trackId: string, options: { effect: string; preset: string }): Promise<StudioJobResponse> {
+export async function processVocal(trackId: string, options: { effects: string[]; preset: string }): Promise<StudioJobResponse> {
   const base = requireApiUrl();
   const response = await fetch(base + "/v1/studio/vocal-effects", {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify({ trackId, effect: options.effect, preset: options.preset })
+    body: JSON.stringify({ trackId, effects: options.effects, preset: options.preset, quality: "professional", outputFormat: "wav" })
   });
   if (!response.ok) throw new Error("El procesador vocal respondió con un error (" + response.status + ").");
   return await response.json() as StudioJobResponse;
