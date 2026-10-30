@@ -8,6 +8,7 @@ Aplicación Android nativa con Expo + React Native + TypeScript. No utiliza WebV
 - Pantalla Crear: descripción, género, idioma y letra.
 - Pantalla Mi voz: permiso de micrófono y grabación real de hasta 60 segundos.
 - La muestra queda local en el dispositivo hasta que el usuario pulsa enviar.
+- Pantalla Estudio: importar audio del dispositivo, solicitar separación de voz/instrumental y seleccionar efectos/presets vocales.
 - Pantalla Biblioteca para mostrar solicitudes recibidas por el backend.
 - Cliente API preparado para enviar muestras y solicitudes de canciones.
 - Claves de proveedores reservadas para backend; nunca se guardan en la APK.
@@ -24,6 +25,9 @@ Para compilar Android se puede usar EAS Build o `npx expo run:android` en un ent
 
 - `POST /v1/voice-samples`: recibe multipart `audio`; debe exigir autenticación, consentimiento y propiedad de la muestra.
 - `POST /v1/songs`: recibe JSON con `prompt`, `lyrics`, `genre`, `language` y `voiceSampleAvailable`; devuelve `id`, `title`, `status` y opcionalmente `audioUrl`.
+- `POST /v1/studio/tracks`: recibe multipart `audio`; devuelve `id` de pista.
+- `POST /v1/studio/separate`: recibe `trackId` y `stems: [vocals, instrumental]`; devuelve el estado del trabajo.
+- `POST /v1/studio/vocal-effects`: recibe `trackId`, `effect` y `preset`; devuelve el estado del procesamiento.
 
 ## Lo que aún requiere configuración externa
 
