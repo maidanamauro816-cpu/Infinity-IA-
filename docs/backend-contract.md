@@ -10,13 +10,13 @@ Todos los endpoints deben usar HTTPS y autenticación por usuario. Las credencia
 | POST /v1/songs | prompt, lyrics, genre, language, voiceSampleAvailable | id, title, status, audioUrl opcional |
 | POST /v1/studio/tracks | multipart: audio | id de pista |
 | POST /v1/studio/separate | trackId, stems: vocals/instrumental | id y status del trabajo |
-| POST /v1/studio/vocal-effects | trackId, effect, preset | id y status del trabajo |
+| POST /v1/studio/vocal-effects | trackId, effects[], preset, quality, outputFormat | id y status del trabajo |
 
 ## Procesamiento de estudio
 
 - Separación de stems: integrar un proveedor real de separación de fuentes, entregar pista vocal e instrumental como archivos separados.
 - Corrección de tono: integrar un procesador de pitch correction/autotune con control de tonalidad y escala.
-- Efectos: cadena DSP configurable de EQ, compresor, reverb, delay, chorus, saturación/distorsión y reducción de ruido.
+- Efectos: cadena DSP profesional configurable: afinación vocal, EQ paramétrico, compresión simple/multibanda, de-esser, gate/expander, reverbs de placa/sala, delays estéreo/ping-pong, chorus, flanger, phaser, saturación, distorsión armónica, exciter, doblador, armonizador, vocoder, reducción de ruido, limitador, stereo widening y control de transientes.
 - Presets: son configuraciones de parámetros de la cadena, no archivos de audio ni efectos ejecutados en el teléfono.
 - Los trabajos pueden ser asíncronos. El backend debe exponer un endpoint de consulta de estado y URLs temporales de salida para que la app pueda mostrar y reproducir resultados.
 
