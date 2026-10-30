@@ -24,7 +24,7 @@ function requireApiUrl() {
 export async function uploadVoiceSample(uri: string): Promise<void> {
   const base = requireApiUrl();
   const form = new FormData();
-  form.append("audio", { uri, name: "voice-sample.m4a", type: "audio/mp4" } as unknown as Blob);
+  form.append("audio", { uri, name: "voice-sample.m4a", type: "audio/mp4" } as unknown as Blob);\n  form.append("consent", "true");
   const response = await fetch(base + "/v1/voice-samples", {
     method: "POST",
     headers: { Accept: "application/json" },
@@ -80,4 +80,12 @@ export async function processVocal(trackId: string, options: { effects: string[]
   });
   if (!response.ok) throw new Error("El procesador vocal respondió con un error (" + response.status + ").");
   return await response.json() as StudioJobResponse;
+}
+
+export type StudioJobStatus = { id: string; status: string; outputUrl?: string; error?: string };
+export async function getStudioJob(id: string): Promise<StudioJobStatus> {
+  const base = requireApiUrl();
+  const response = await fetch(base + "/v1/jobs/" + encodeURIComponent(id), { headers: { Accept: "application/json" } });
+  if (!response.ok) throw new Error("No se pudo consultar el trabajo de audio (" + response.status + ").");
+  return await response.json() as StudioJobStatus;
 }
