@@ -2,11 +2,17 @@
   "expo": {
     "name": "SixSeven Music",
     "slug": "sixseven-music",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "android": {
-      "package": "com.sixseven.music"
+      "package": "com.sixseven.music",
+      "permissions": ["RECORD_AUDIO"]
+    },
+    "ios": {
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "SixSeven Music necesita el micrófono para grabar tu propia voz."
+      }
     }
   }
 }
