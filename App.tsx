@@ -174,7 +174,7 @@ export default function App() {
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="light-content" backgroundColor="#090711" />
       <View style={styles.header}>
-        <View><Text style={styles.brand}>SIXSEVEN</Text><Text style={styles.brandSub}>MUSIC STUDIO</Text></View>
+        <View><Text style={styles.brand}>SUMO</Text><Text style={styles.brandSub}>MUSIC STUDIO</Text></View>
         <View style={styles.avatar}><Text style={styles.avatarText}>♪</Text></View>
       </View>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
@@ -182,7 +182,7 @@ export default function App() {
           {tab === "create" && <>
             <Text style={styles.eyebrow}>TU ESTUDIO CREATIVO</Text>
             <Text style={styles.heading}>Convertí una idea{"\n"}en una canción.</Text>
-            <Text style={styles.subheading}>Describí el sonido que imaginás. SixSeven Music prepara tu proyecto.</Text>
+            <Text style={styles.subheading}>Describí el sonido que imaginás. SUMO prepara tu proyecto.</Text>
             <View style={styles.card}>
               <Text style={styles.fieldLabel}>¿QUÉ QUERÉS CREAR?</Text>
               <TextInput value={prompt} onChangeText={setPrompt} placeholder="Ej.: una balada pop emotiva, con piano y guitarra…" placeholderTextColor="#756D85" multiline style={styles.textArea} />
@@ -261,7 +261,7 @@ export default function App() {
             {songs.length === 0 ? <View style={styles.empty}><Text style={styles.emptyIcon}>♫</Text><Text style={styles.emptyTitle}>Todavía no hay canciones</Text><Text style={styles.emptySub}>Cuando conectemos el motor musical, tus creaciones aparecerán en esta biblioteca.</Text><Pressable onPress={() => setTab("create")} style={styles.secondaryButton}><Text style={styles.secondaryText}>＋  CREAR MI PRIMERA CANCIÓN</Text></Pressable></View> : songs.map(song => <View key={song.id} style={styles.songRow}><View style={styles.songIcon}><Text style={styles.songIconText}>♫</Text></View><View style={styles.flex}><Text style={styles.songTitle}>{song.title}</Text><Text style={styles.songMeta}>{song.style} · {song.status}</Text></View></View>)}
           </>}
           <View style={styles.statusBox}><View style={styles.statusDot}/><Text style={styles.statusText}>{message}</Text></View>
-          <Text style={styles.footer}>SIXSEVEN MUSIC · TU VOZ, TU MÚSICA</Text>
+          <Text style={styles.footer}>SUMO MUSIC · TU VOZ, TU MÚSICA</Text>
         </ScrollView>
       </KeyboardAvoidingView>
       <View style={styles.bottomNav}>
