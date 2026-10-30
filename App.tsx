@@ -4,9 +4,10 @@ import {
   SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TextInput, View
 } from "react-native";
 import { Audio } from "expo-av";
-import { createSong, uploadVoiceSample, type SongRequest } from "./src/services/api";
+import * as DocumentPicker from "expo-document-picker";
+import { createSong, uploadVoiceSample, uploadStudioTrack, separateStems, processVocal, type SongRequest } from "./src/services/api";
 
-type Tab = "create" | "voice" | "library";
+type Tab = "create" | "voice" | "studio" | "library";
 type Song = { id: string; title: string; style: string; status: string; audioUrl?: string };
 
 const PURPLE = "#A78BFA";
@@ -24,6 +25,10 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const [uploadBusy, setUploadBusy] = useState(false);
   const [songs, setSongs] = useState<Song[]>([]);
+  const [studioTrack, setStudioTrack] = useState<{uri:string;name:string;mimeType?:string}|null>(null);
+  const [studioBusy, setStudioBusy] = useState(false);
+  const [effect, setEffect] = useState("Auto-Tune");
+  const [preset, setPreset] = useState("Lead vocal");
   const [message, setMessage] = useState("Tu estudio musical está listo para empezar.");
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   const recordingRef = useRef<Audio.Recording | null>(null);
@@ -87,6 +92,40 @@ export default function App() {
       setMessage(error instanceof Error ? error.message : "No se pudo enviar la muestra. Configurá el backend.");
     } finally {
       setUploadBusy(false);
+    }
+  };
+
+  const pickStudioTrack = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({ type: ["audio/*"], copyToCacheDirectory: true, multiple: false });
+      if (result.canceled || !result.assets?.[0]) return;
+      const asset = result.assets[0];
+      setStudioTrack({ uri: asset.uri, name: asset.name, mimeType: asset.mimeType });
+      setMessage("Audio seleccionado: " + asset.name);
+    } catch (error) {
+      Alert.alert("No se pudo abrir el audio", error instanceof Error ? error.message : "Error al seleccionar el archivo.");
+    }
+  };
+
+  const runStudioAction = async (action: "separate" | "effect") => {
+    if (!studioTrack) {
+      Alert.alert("Elegí un audio", "Primero importá una canción o una grabación desde tu teléfono.");
+      return;
+    }
+    setStudioBusy(true);
+    try {
+      const uploaded = await uploadStudioTrack(studioTrack.uri, studioTrack.name, studioTrack.mimeType);
+      if (action === "separate") {
+        const result = await separateStems(uploaded.id);
+        setMessage("Separación solicitada. Trabajo: " + (result.status || "en cola"));
+      } else {
+        const result = await processVocal(uploaded.id, { effect, preset });
+        setMessage("Procesamiento vocal solicitado. Trabajo: " + (result.status || "en cola"));
+      }
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "No se pudo procesar el audio. Revisá la conexión del backend.");
+    } finally {
+      setStudioBusy(false);
     }
   };
 
@@ -168,6 +207,38 @@ export default function App() {
             <View style={styles.notice}><Text style={styles.noticeTitle}>Privacidad de tu voz</Text><Text style={styles.noticeText}>La grabación queda primero en tu teléfono. No se crea un clon automáticamente. El envío requiere que vos lo solicites y un backend seguro configurado. Usá únicamente tu voz o una voz con autorización.</Text></View>
           </>}
 
+          {tab === "studio" && <>
+            <Text style={styles.eyebrow}>ESTUDIO DE AUDIO</Text>
+            <Text style={styles.heading}>Dale forma a{"\n"}tu sonido.</Text>
+            <Text style={styles.subheading}>Importá una pista para trabajar la voz, separar instrumental y voz, y preparar una mezcla con efectos.</Text>
+            <View style={styles.card}>
+              <Text style={styles.fieldLabel}>TU ARCHIVO DE AUDIO</Text>
+              <Pressable onPress={pickStudioTrack} style={styles.importButton}>
+                <Text style={styles.importIcon}>＋</Text>
+                <Text style={styles.importTitle}>{studioTrack ? "Cambiar archivo" : "Importar audio del teléfono"}</Text>
+                <Text style={styles.importSub}>MP3, WAV, M4A y formatos compatibles</Text>
+              </Pressable>
+              {studioTrack && <View style={styles.selectedTrack}><Text style={styles.trackIcon}>♫</Text><View style={styles.flex}><Text numberOfLines={1} style={styles.songTitle}>{studioTrack.name}</Text><Text style={styles.songMeta}>Archivo seleccionado en este dispositivo</Text></View></View>}
+            </View>
+            <View style={styles.card}>
+              <Text style={styles.fieldLabel}>SEPARACIÓN DE PISTAS</Text>
+              <Text style={styles.toolTitle}>Voz + instrumental</Text>
+              <Text style={styles.toolDescription}>Separá una canción en pistas independientes para trabajar la voz o quedarte con la base instrumental. Requiere un servicio de separación de stems conectado.</Text>
+              <Pressable disabled={studioBusy} onPress={() => runStudioAction("separate")} style={[styles.primaryButton,studioBusy && styles.disabled]}>{studioBusy ? <ActivityIndicator color="#FFFFFF"/> : <Text style={styles.primaryText}>⇄  SEPARAR VOZ E INSTRUMENTAL</Text>}</Pressable>
+            </View>
+            <View style={styles.card}>
+              <Text style={styles.fieldLabel}>PROCESAMIENTO VOCAL</Text>
+              <Text style={styles.toolTitle}>Efectos de estudio</Text>
+              <Text style={styles.toolDescription}>Elegí un efecto principal y un preset de mezcla. La cadena final se procesa en el servidor de audio.</Text>
+              <Text style={styles.fieldLabel}>EFECTO</Text>
+              <View style={styles.chips}>{["Auto-Tune","Reverb","Delay","Chorus","Compresor","EQ","Distorsión","Reducción ruido"].map(x => <Pressable key={x} onPress={() => setEffect(x)} style={[styles.chip,effect===x && styles.chipSelected]}><Text style={[styles.chipText,effect===x && styles.chipTextSelected]}>{x}</Text></Pressable>)}</View>
+              <Text style={styles.fieldLabel}>PRESET VOCAL</Text>
+              <View style={styles.chips}>{["Lead vocal","Rap / Trap","Cumbia","Pop brillante","Voz cálida","Doblaje"].map(x => <Pressable key={x} onPress={() => setPreset(x)} style={[styles.chip,preset===x && styles.chipSelected]}><Text style={[styles.chipText,preset===x && styles.chipTextSelected]}>{x}</Text></Pressable>)}</View>
+              <Pressable disabled={studioBusy} onPress={() => runStudioAction("effect")} style={[styles.primaryButton,studioBusy && styles.disabled]}>{studioBusy ? <ActivityIndicator color="#FFFFFF"/> : <Text style={styles.primaryText}>✦  PROCESAR MI VOZ</Text>}</Pressable>
+            </View>
+            <View style={styles.notice}><Text style={styles.noticeTitle}>Herramientas incluidas en el diseño</Text><Text style={styles.noticeText}>Corrección de tono tipo Auto-Tune, reverb, delay, chorus, compresión, ecualizador, distorsión, reducción de ruido, presets vocales y separación de stems. Los nombres describen funciones de audio habituales; no se copian marcas, interfaces ni efectos propietarios de Voloco.</Text></View>
+          </>}
+
           {tab === "library" && <>
             <Text style={styles.eyebrow}>TU COLECCIÓN</Text>
             <Text style={styles.heading}>Mis canciones.</Text>
@@ -181,6 +252,7 @@ export default function App() {
       <View style={styles.bottomNav}>
         <NavButton id="create" label="Crear" icon="✦" />
         <NavButton id="voice" label="Mi voz" icon="◉" />
+        <NavButton id="studio" label="Estudio" icon="♫" />
         <NavButton id="library" label="Biblioteca" icon="♫" />
       </View>
     </SafeAreaView>
@@ -189,6 +261,7 @@ export default function App() {
 
 const styles = StyleSheet.create({
   safe:{flex:1,backgroundColor:"#090711"},flex:{flex:1},
+  importButton:{minHeight:112,borderWidth:1,borderStyle:"dashed",borderColor:"#7656A8",borderRadius:16,alignItems:"center",justifyContent:"center",backgroundColor:"#100D18",padding:15},importIcon:{color:PURPLE,fontSize:28},importTitle:{color:"#FFFFFF",fontSize:14,fontWeight:"800",marginTop:5},importSub:{color:muted,fontSize:10,marginTop:5},selectedTrack:{flexDirection:"row",alignItems:"center",gap:12,backgroundColor:"#211832",borderRadius:13,padding:12,marginTop:12},trackIcon:{fontSize:25,color:PURPLE},toolTitle:{color:"#FFFFFF",fontSize:18,fontWeight:"900"},toolDescription:{color:muted,fontSize:12,lineHeight:19,marginTop:7},
   header:{height:68,paddingHorizontal:22,flexDirection:"row",alignItems:"center",justifyContent:"space-between",borderBottomWidth:1,borderBottomColor:"#211B30"},
   brand:{color:"#FFFFFF",fontSize:17,fontWeight:"900",letterSpacing:3},brandSub:{color:PURPLE,fontSize:9,letterSpacing:3,marginTop:2,fontWeight:"800"},
   avatar:{width:38,height:38,borderRadius:14,backgroundColor:"#211832",borderWidth:1,borderColor:"#51406F",alignItems:"center",justifyContent:"center"},avatarText:{color:PURPLE,fontSize:22},
