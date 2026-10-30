@@ -27,7 +27,7 @@ export default function App() {
   const [songs, setSongs] = useState<Song[]>([]);
   const [studioTrack, setStudioTrack] = useState<{uri:string;name:string;mimeType?:string}|null>(null);
   const [studioBusy, setStudioBusy] = useState(false);
-  const [effects, setEffects] = useState<string[]>(["Afinación vocal", "EQ paramétrico", "Compresor"]);
+  const [effects, setEffects] = useState<string[]>(["EQ paramétrico", "Compresor"]);
   const [preset, setPreset] = useState("Lead vocal");
   const [message, setMessage] = useState("Tu estudio musical está listo para empezar.");
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -229,10 +229,10 @@ export default function App() {
             <View style={styles.card}>
               <Text style={styles.fieldLabel}>PROCESAMIENTO VOCAL</Text>
               <Text style={styles.toolTitle}>Efectos de estudio</Text>
-              <Text style={styles.toolDescription}>Elegí un efecto principal y un preset de mezcla. La cadena final se procesa en el servidor de audio.</Text>
+              <Text style={styles.toolDescription}>Elegí un efecto principal y un preset de mezcla. La cadena se aplica con filtros DSP reales del motor FFmpeg del servidor. Afinación automática avanzada, armonizador y vocoder requieren módulos especializados adicionales.</Text>
               <Text style={styles.fieldLabel}>CADENA PROFESIONAL · SELECCIONÁ VARIOS</Text>
               <Text style={styles.toolDescription}>Activá los módulos que quieras combinar. El orden y los parámetros definitivos los aplica el procesador del servidor.</Text>
-              <View style={styles.chips}>{["Afinación vocal","EQ paramétrico","Compresor","De-esser","Gate / Expander","Reverb de placa","Reverb de sala","Delay estéreo","Ping-pong delay","Chorus","Flanger","Phaser","Saturación analógica","Distorsión armónica","Exciter","Doblador vocal","Armonizador","Vocoder","Reducción de ruido","Limitador","Compresión multibanda","Stereo widener","Transientes","Auto nivel"].map(x => <Pressable key={x} onPress={() => setEffects(current => current.includes(x) ? current.filter(v => v !== x) : [...current, x])} style={[styles.chip,effects.includes(x) && styles.chipSelected]}><Text style={[styles.chipText,effects.includes(x) && styles.chipTextSelected]}>{effects.includes(x) ? "✓ " : "+ "}{x}</Text></Pressable>)}</View>
+              <View style={styles.chips}>{["EQ paramétrico","Compresor","De-esser","Gate / Expander","Reverb de placa","Reverb de sala","Reverb Hall","Reverb Catedral","Echo Slapback","Echo Ping-pong","Delay estéreo","Chorus","Flanger","Phaser","Saturación analógica","Distorsión armónica","Exciter","Doblador vocal","Reducción de ruido","Limitador","Compresión multibanda","Stereo widener","Control de transientes"].map(x => <Pressable key={x} onPress={() => setEffects(current => current.includes(x) ? current.filter(v => v !== x) : [...current, x])} style={[styles.chip,effects.includes(x) && styles.chipSelected]}><Text style={[styles.chipText,effects.includes(x) && styles.chipTextSelected]}>{effects.includes(x) ? "✓ " : "+ "}{x}</Text></Pressable>)}</View>
               <Text style={styles.fieldLabel}>PRESET / CADENA INICIAL</Text>
               <View style={styles.chips}>{["Lead vocal","Rap / Trap","Cumbia potente","Reggaetón moderno","Pop brillante","Rock agresivo","Voz cálida","Balada íntima","Voz aireada","Radio / Broadcast","Doblaje ancho","Vocoder creativo"].map(x => <Pressable key={x} onPress={() => setPreset(x)} style={[styles.chip,preset===x && styles.chipSelected]}><Text style={[styles.chipText,preset===x && styles.chipTextSelected]}>{x}</Text></Pressable>)}</View>
               <Text style={styles.hint}>{effects.length} módulos seleccionados · {preset}</Text>
