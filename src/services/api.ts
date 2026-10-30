@@ -24,7 +24,8 @@ function requireApiUrl() {
 export async function uploadVoiceSample(uri: string): Promise<void> {
   const base = requireApiUrl();
   const form = new FormData();
-  form.append("audio", { uri, name: "voice-sample.m4a", type: "audio/mp4" } as unknown as Blob);\n  form.append("consent", "true");
+  form.append("audio", { uri, name: "voice-sample.m4a", type: "audio/mp4" } as unknown as Blob);
+  form.append("consent", "true");
   const response = await fetch(base + "/v1/voice-samples", {
     method: "POST",
     headers: { Accept: "application/json" },
