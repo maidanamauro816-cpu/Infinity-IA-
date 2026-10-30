@@ -71,7 +71,7 @@ export default function App() {
       await current.stopAndUnloadAsync();
       const uri = current.getURI();
       if (uri) setVoiceUri(uri);
-      await Audio.setAudioModeAsync({ allowsRecordingIOS: false, playsIn silentModeIOS: true });
+      await Audio.setAudioModeAsync({ allowsRecordingIOS: false, playsInSilentModeIOS: true });
       setRecording(null);
       recordingRef.current = null;
       setMessage(uri ? "Muestra de voz guardada en este dispositivo. Todavía no se ha enviado a ningún servidor." : "No se pudo guardar la grabación.");
