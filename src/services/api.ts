@@ -43,3 +43,41 @@ export async function createSong(request: SongRequest): Promise<SongResponse> {
   if (!response.ok) throw new Error("El motor musical respondió con un error (" + response.status + ").");
   return await response.json() as SongResponse;
 }
+
+export type StudioUploadResponse = { id: string; status?: string };
+export type StudioJobResponse = { id?: string; status?: string; outputs?: string[] };
+
+export async function uploadStudioTrack(uri: string, name: string, mimeType?: string): Promise<StudioUploadResponse> {
+  const base = requireApiUrl();
+  const form = new FormData();
+  form.append("audio", { uri, name, type: mimeType || "audio/mpeg" } as unknown as Blob);
+  const response = await fetch(base + "/v1/studio/tracks", {
+    method: "POST",
+    headers: { Accept: "application/json" },
+    body: form
+  });
+  if (!response.ok) throw new Error("No se pudo subir la pista al estudio (" + response.status + ").");
+  return await response.json() as StudioUploadResponse;
+}
+
+export async function separateStems(trackId: string): Promise<StudioJobResponse> {
+  const base = requireApiUrl();
+  const response = await fetch(base + "/v1/studio/separate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ trackId, stems: ["vocals", "instrumental"] })
+  });
+  if (!response.ok) throw new Error("El servicio de separación respondió con un error (" + response.status + ").");
+  return await response.json() as StudioJobResponse;
+}
+
+export async function processVocal(trackId: string, options: { effect: string; preset: string }): Promise<StudioJobResponse> {
+  const base = requireApiUrl();
+  const response = await fetch(base + "/v1/studio/vocal-effects", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ trackId, effect: options.effect, preset: options.preset })
+  });
+  if (!response.ok) throw new Error("El procesador vocal respondió con un error (" + response.status + ").");
+  return await response.json() as StudioJobResponse;
+}
