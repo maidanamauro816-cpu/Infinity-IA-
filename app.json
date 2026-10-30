@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "SixSeven Music",
-    "slug": "sixseven-music",
-    "version": "0.2.0",
+    "name": "SUMO",
+    "slug": "sumo",
+    "version": "0.3.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "android": {
@@ -11,7 +11,7 @@
     },
     "ios": {
       "infoPlist": {
-        "NSMicrophoneUsageDescription": "SixSeven Music necesita el micrófono para grabar tu propia voz."
+        "NSMicrophoneUsageDescription": "SUMO necesita el micrófono para grabar tu propia voz."
       }
     }
   }
