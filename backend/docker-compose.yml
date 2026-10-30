@@ -1,0 +1,12 @@
+services:
+  sixseven-audio:
+    build: .
+    ports:
+      - "${PORT:-8080}:8080"
+    env_file:
+      - .env
+    volumes:
+      - sixseven-audio-data:/data
+    restart: unless-stopped
+volumes:
+  sixseven-audio-data:
