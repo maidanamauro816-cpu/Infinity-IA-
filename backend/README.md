@@ -12,9 +12,9 @@ docker compose up --build
 El volumen `/data` conserva archivos y resultados. En producción debe montarse un volumen persistente, usar HTTPS, autenticación por usuario, cuotas, borrado programado y almacenamiento privado con enlaces firmados.
 
 ## Efectos FFmpeg disponibles
-Afinación/pitch shift Rubber Band (si el build FFmpeg incluye librubberband), EQ, compresión, compresión multibanda, de-esser, gate, reverbs algorítmicas de sala/placa/hall/catedral, slapback, ping-pong, delay estéreo, chorus, flanger, phaser, saturación, distorsión, exciter, reducción de ruido, limitador y stereo widening.
+EQ, compresión, compresión multibanda, de-esser, gate, reverbs algorítmicas de sala/placa/hall/catedral, slapback, ping-pong, delay estéreo, chorus, flanger, phaser, saturación, distorsión, exciter, reducción de ruido, limitador y stereo widening.
 
-Los presets son cadenas DSP originales. Las reverbs de esta primera versión son reverberación algorítmica multi-eco, no convolución con impulsos de salas reales. Vocoder y armonizador todavía requieren motores especializados; no se simulan como si funcionaran.
+Los presets son cadenas DSP originales. Las reverbs de esta primera versión son reverberación algorítmica multi-eco, no convolución con impulsos de salas reales. Afinación automática inteligente, vocoder y armonizador todavía requieren motores especializados; no se simulan como si funcionaran.
 
 ## Rutas
 - `GET /health`
