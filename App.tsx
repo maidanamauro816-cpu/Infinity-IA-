@@ -40,18 +40,17 @@ export default function App() {
         Alert.alert("Permiso de micrófono", "Necesitamos permiso para grabar tu propia voz.");
         return;
       }
-      await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsIn silentModeIOS: true, staysActiveInBackground: false, shouldDuckAndroid: true, playThroughEarpieceAndroid: false });
+      await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true, staysActiveInBackground: false, shouldDuckAndroid: true, playThroughEarpieceAndroid: false });
       const result = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
       recordingRef.current = result.recording;
       setRecording(result.recording);
       setSeconds(0);
       setMessage("Grabando tu voz. Busca un lugar silencioso y canta o habla con naturalidad.");
-      timer.current = setInterval(async () => {
-        setSeconds(s => {
-          const next = s + 1;
-          if (next >= 60) stopRecording();
-          return Math.min(next, 60);
-        });
+      let elapsed = 0;
+      timer.current = setInterval(() => {
+        elapsed += 1;
+        setSeconds(Math.min(elapsed, 60));
+        if (elapsed >= 60) void stopRecording();
       }, 1000);
     } catch (error) {
       Alert.alert("No se pudo iniciar", error instanceof Error ? error.message : "Error al acceder al micrófono.");
